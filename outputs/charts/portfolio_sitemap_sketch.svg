@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" width="100%" height="100%" style="background:#090D16; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#1D4ED8" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Title Header -->
+  <text x="450" y="38" text-anchor="middle" fill="#F8FAFC" font-size="20" font-weight="700" letter-spacing="0.5">PORTFOLIO SITEMAP &amp; NARRATIVE ARCHITECTURE</text>
+  <text x="450" y="58" text-anchor="middle" fill="#94A3B8" font-size="12">Target Persona: Engineering Director / Tech Founder | One Action: Book 15-Min Technical Deep-Dive</text>
+
+  <!-- Flow Connector Line -->
+  <line x1="450" y1="80" x2="450" y2="580" stroke="#334155" stroke-width="2" stroke-dasharray="4,4" />
+
+  <!-- SECTION 1: HERO / HOOK -->
+  <g transform="translate(150, 80)" filter="url(#shadow)">
+    <rect width="600" height="95" rx="8" fill="url(#cardGrad)" stroke="#3B82F6" stroke-width="1.5" />
+    <rect x="0" y="0" width="8" height="95" rx="4" fill="#3B82F6" />
+    <text x="24" y="28" fill="#38BDF8" font-size="11" font-weight="700" letter-spacing="1">STAGE 1: THE LANDING &amp; CLAIM (HERO)</text>
+    <text x="24" y="48" fill="#F8FAFC" font-size="13" font-weight="600">"I build reliable, observable systems at the intersection of RTOS, ML, and reactive web."</text>
+    <text x="24" y="68" fill="#94A3B8" font-size="11">• Status: Open for High-Impact Engineering Roles &nbsp;|&nbsp; • Real-time telemetry indicators</text>
+    <rect x="420" y="52" width="160" height="28" rx="4" fill="url(#primaryGrad)" />
+    <text x="500" y="70" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="700">Book 15-Min Deep-Dive →</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <polygon points="446,188 454,188 450,196" fill="#3B82F6" />
+
+  <!-- SECTION 2: PROOF / FLAGSHIP CASE STUDIES -->
+  <g transform="translate(100, 205)" filter="url(#shadow)">
+    <rect width="700" height="150" rx="8" fill="url(#cardGrad)" stroke="#64748B" stroke-width="1" />
+    <text x="24" y="26" fill="#A855F7" font-size="11" font-weight="700" letter-spacing="1">STAGE 2: THE EVIDENCE (3 FLAGSHIP VERIFIABLE SYSTEMS)</text>
+    <text x="24" y="44" fill="#94A3B8" font-size="11">Zero generic project galleries. Every item is a high-depth case study with measurable outcomes.</text>
+
+    <!-- Case Study 1 -->
+    <rect x="20" y="55" width="205" height="80" rx="6" fill="#0B132B" stroke="#1E293B" stroke-width="1" />
+    <text x="32" y="74" fill="#38BDF8" font-size="11" font-weight="700">1. FlyRank ML Engine</text>
+    <text x="32" y="90" fill="#E2E8F0" font-size="10">• 2.8x Lift over Hand Rule</text>
+    <text x="32" y="105" fill="#94A3B8" font-size="9">• Precision@50: 0.240 → 0.680</text>
+    <text x="32" y="120" fill="#10B981" font-size="9">✓ Code &amp; Holdout Validation</text>
+
+    <!-- Case Study 2 -->
+    <rect x="247" y="55" width="205" height="80" rx="6" fill="#0B132B" stroke="#1E293B" stroke-width="1" />
+    <text x="259" y="74" fill="#38BDF8" font-size="11" font-weight="700">2. Zephyr RTOS Driver</text>
+    <text x="259" y="90" fill="#E2E8F0" font-size="10">• Deterministic State Machine</text>
+    <text x="259" y="105" fill="#94A3B8" font-size="9">• Zero race conditions in ISR</text>
+    <text x="259" y="120" fill="#10B981" font-size="9">✓ Upstream Open Source PRs</text>
+
+    <!-- Case Study 3 -->
+    <rect x="475" y="55" width="205" height="80" rx="6" fill="#0B132B" stroke="#1E293B" stroke-width="1" />
+    <text x="487" y="74" fill="#38BDF8" font-size="11" font-weight="700">3. GeetHub Reactive Engine</text>
+    <text x="487" y="90" fill="#E2E8F0" font-size="10">• Next.js App Router Architecture</text>
+    <text x="487" y="105" fill="#94A3B8" font-size="9">• Strict Type Contracts &amp; GSAP</text>
+    <text x="487" y="120" fill="#10B981" font-size="9">✓ Live 60fps Performance</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <polygon points="446,367 454,367 450,375" fill="#A855F7" />
+
+  <!-- SECTION 3: ENGINEERING PHILOSOPHY -->
+  <g transform="translate(150, 385)" filter="url(#shadow)">
+    <rect width="600" height="95" rx="8" fill="url(#cardGrad)" stroke="#64748B" stroke-width="1" />
+    <text x="24" y="26" fill="#F59E0B" font-size="11" font-weight="700" letter-spacing="1">STAGE 3: THE MINDSET (ENGINEERING PHILOSOPHY &amp; TOOLKIT)</text>
+    <text x="24" y="48" fill="#E2E8F0" font-size="11"><b>1. First-Principles Foundations:</b> Understand the kernel/math before abstracting.</text>
+    <text x="24" y="65" fill="#E2E8F0" font-size="11"><b>2. Honest Measurement:</b> Client-holdout validation &gt; optimistic in-sample metrics.</text>
+    <text x="24" y="82" fill="#E2E8F0" font-size="11"><b>3. Technical Stack:</b> Python (DuckDB, Sklearn), C/C++, Next.js / TypeScript, Git / CI.</text>
+  </g>
+
+  <!-- Arrow 3 -->
+  <polygon points="446,492 454,492 450,500" fill="#F59E0B" />
+
+  <!-- SECTION 4: CONVERSION / ACTION -->
+  <g transform="translate(150, 510)" filter="url(#shadow)">
+    <rect width="600" height="90" rx="8" fill="url(#cardGrad)" stroke="#10B981" stroke-width="1.5" />
+    <rect x="0" y="0" width="8" height="90" rx="4" fill="#10B981" />
+    <text x="24" y="26" fill="#10B981" font-size="11" font-weight="700" letter-spacing="1">STAGE 4: THE ONE ACTION (CONVERSION)</text>
+    <text x="24" y="48" fill="#F8FAFC" font-size="12" font-weight="600">Zero Contact Forms. Zero Friction. Instant Technical Connection.</text>
+    
+    <rect x="24" y="56" width="220" height="24" rx="4" fill="url(#accentGrad)" />
+    <text x="134" y="72" text-anchor="middle" fill="#FFFFFF" font-size="10" font-weight="700">🗓 Book 15-Min Technical Call</text>
+
+    <rect x="260" y="56" width="180" height="24" rx="4" fill="#1E293B" stroke="#334155" stroke-width="1" />
+    <text x="350" y="72" text-anchor="middle" fill="#CBD5E1" font-size="10">✉ Direct: harshitkudhial@gmail.com</text>
+
+    <rect x="455" y="56" width="125" height="24" rx="4" fill="#1E293B" stroke="#334155" stroke-width="1" />
+    <text x="517" y="72" text-anchor="middle" fill="#CBD5E1" font-size="10">GitHub: @harshitttt077</text>
+  </g>
+</svg>
