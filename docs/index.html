@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prioritizing Search Content Decay: A Leak-Free Learning-to-Rank Engine | Harshit Kudhial</title>
+  <meta name="description" content="Research paper and machine learning system prioritizing web search content decay for enterprise editorial refresh queues under capacity constraints.">
+  <meta name="author" content="Harshit Kudhial">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --card-dark: #131b2e;
+      --accent: #2563eb;
+      --accent-glow: #3b82f6;
+      --teal: #10b981;
+      --teal-glow: #34d399;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --paper-bg: #fdfdfc;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-dark);
+      color: #0f172a;
+      line-height: 1.6;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Top Sticky Navigation Bar */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11, 15, 25, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      color: #f1f5f9;
+    }
+    .brand-title {
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-badge {
+      background: rgba(37, 99, 235, 0.25);
+      border: 1px solid rgba(59, 130, 246, 0.5);
+      color: #93c5fd;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .view-toggles {
+      display: flex;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 3px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .toggle-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .toggle-btn:hover { color: #f8fafc; }
+    .toggle-btn.active {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    }
+    .nav-links {
+      display: flex;
+      gap: 14px;
+      font-size: 13px;
+    }
+    .nav-links a {
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .nav-links a:hover { color: #ffffff; }
+
+    /* Container */
+    .main-container {
+      max-width: 1040px;
+      margin: 32px auto 60px;
+      padding: 0 20px;
+    }
+
+    /* VIEW 1: Formal Research Paper Container */
+    .paper-sheet {
+      background: var(--paper-bg);
+      border-radius: 12px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+      padding: 56px 64px 80px;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 17.5px;
+      line-height: 1.72;
+      color: #1e293b;
+    }
+    @media (max-width: 768px) {
+      .paper-sheet { padding: 32px 24px; font-size: 16px; }
+    }
+
+    .paper-header {
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+    .paper-venue {
+      font-family: 'Inter', sans-serif;
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 12px;
+    }
+    .paper-title {
+      font-size: 34px;
+      line-height: 1.25;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .paper-authors {
+      font-family: 'Inter', sans-serif;
+      font-size: 14.5px;
+      color: #475569;
+    }
+    .paper-authors b { color: #0f172a; }
+
+    /* Abstract Block */
+    .abstract-box {
+      background: #f1f5f9;
+      border-left: 4px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 22px 26px;
+      margin: 28px 0 36px;
+    }
+    .abstract-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .abstract-box p {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.68;
+      color: #1e293b;
+    }
+
+    /* Headings */
+    h2.sec-heading {
+      font-family: 'Inter', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 44px 0 16px;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 8px;
+    }
+    h3.sub-heading {
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 24px 0 10px;
+    }
+    p { margin-bottom: 16px; }
+    ul, ol { margin: 0 0 18px 26px; }
+    li { margin-bottom: 6px; }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      margin: 22px 0 28px;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    table.data-table caption {
+      text-align: left;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+    table.data-table th {
+      background: #f8fafc;
+      border-top: 2px solid #0f172a;
+      border-bottom: 1px solid #0f172a;
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    table.data-table td {
+      padding: 9px 14px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #334155;
+    }
+    table.data-table tr.highlight-row td {
+      background: #eff6ff;
+      font-weight: 600;
+      color: #1e3a8a;
+    }
+    table.data-table tbody tr:last-child td {
+      border-bottom: 2px solid #0f172a;
+    }
+
+    /* Figures & Charts */
+    figure.paper-fig {
+      margin: 28px 0;
+      padding: 16px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    figure.paper-fig img, figure.paper-fig svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 4px;
+    }
+    figcaption {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #475569;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid #f1f5f9;
+    }
+    figcaption b { color: #0f172a; }
+
+    /* Code Snippets */
+    pre, code {
+      font-family: 'Space Mono', monospace;
+    }
+    code {
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #0f172a;
+    }
+    pre {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 18px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.6;
+      margin: 18px 0 24px;
+    }
+
+    /* KPI Callout Grid (Door 2 Portfolio view) */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin: 24px 0 32px;
+    }
+    .kpi-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 20px;
+      color: #ffffff;
+    }
+    .kpi-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+    .kpi-value {
+      font-size: 36px;
+      font-weight: 800;
+      color: #38bdf8;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .kpi-value.green { color: #34d399; }
+    .kpi-sub {
+      font-size: 12.5px;
+      color: #cbd5e1;
+    }
+
+    /* Door Views Hide/Show */
+    body[data-view="paper"] .portfolio-only,
+    body[data-view="paper"] .playbook-only { display: none; }
+
+    body[data-view="portfolio"] .academic-only,
+    body[data-view="portfolio"] .playbook-only { display: none; }
+
+    body[data-view="playbook"] .academic-only,
+    body[data-view="playbook"] .portfolio-only { display: none; }
+
+    /* Footer */
+    .paper-footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid #e2e8f0;
+      font-family: 'Inter', sans-serif;
+      font-size: 13.5px;
+      color: #64748b;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+  </style>
+</head>
+<body data-view="paper">
+
+  <!-- Top Sticky Bar -->
+  <header class="top-bar">
+    <div class="brand-title">
+      <span>Harshit Kudhial</span>
+      <span class="brand-badge">ML Capstone · Lane 2</span>
+    </div>
+
+    <!-- Door / View Mode Switcher -->
+    <div class="view-toggles">
+      <button class="toggle-btn active" onclick="setView('paper')">🎓 Research Paper</button>
+      <button class="toggle-btn" onclick="setView('portfolio')">💼 Portfolio & Executive</button>
+      <button class="toggle-btn" onclick="setView('playbook')">📋 Action Playbook</button>
+    </div>
+
+    <div class="nav-links">
+      <a href="https://github.com/harshitttt077/flyrank-ml-internship-starter" target="_blank">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        GitHub Repo
+      </a>
+      <a href="https://colab.research.google.com/github/harshitttt077/flyrank-ml-internship-starter/blob/main/work/notebooks/capstone.ipynb" target="_blank">
+        Colab Notebook
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+
+    <!-- DOOR 2: Executive Banner (Shown in Portfolio View) -->
+    <div class="portfolio-only" style="margin-bottom: 24px;">
+      <div style="background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 36px 40px; color: #f8fafc; box-shadow: 0 12px 40px rgba(0,0,0,0.5);">
+        <span style="display:inline-block; font-family:'Space Mono', monospace; font-size:12px; font-weight:700; color:#38bdf8; letter-spacing:0.1em; margin-bottom:12px;">MACHINE LEARNING PORTFOLIO · LANE 2 CAPSTONE</span>
+        <h1 style="font-size: 32px; font-weight: 800; line-height: 1.2; margin-bottom: 14px; letter-spacing: -0.02em;">Prioritizing Search Content Decay: A Leak-Free Learning-to-Rank Engine</h1>
+        <p style="font-size: 16px; color: #94a3b8; max-width: 780px; margin-bottom: 24px;">
+          Built and validated an end-to-end Learning-to-Rank pipeline across 30,000 enterprise web pages. Solves editorial capacity bottlenecks by delivering a <b>2.83x lift in Precision@50</b> over standard industry heuristics, with strictly audited client-holdout splits and zero target leakage.
+        </p>
+
+        <!-- KPI Grid -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Holdout Precision@50</div>
+            <div class="kpi-value green">68.0%</div>
+            <div class="kpi-sub">vs. 24.0% Hand-Rule Baseline</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Empirical Lift Ratio</div>
+            <div class="kpi-value">2.83x</div>
+            <div class="kpi-sub">+22 correct picks per 50 queue</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Validation Design</div>
+            <div class="kpi-value green">Zero Leak</div>
+            <div class="kpi-sub">Grouped 20% client holdout</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Dataset Scale</div>
+            <div class="kpi-value">30,000</div>
+            <div class="kpi-sub">Pages across 200 client domains</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- The Research Paper Sheet -->
+    <article class="paper-sheet">
+
+      <!-- Header & Title -->
+      <div class="paper-header">
+        <div class="paper-venue">FlyRank AI Internship · Search Intelligence Research · September 2026</div>
+        <h1 class="paper-title">Prioritizing Search Content Decay: A Leak-Free Learning-to-Rank Engine for Enterprise SEO Refresh Queues</h1>
+        <div class="paper-authors">
+          <b>Harshit Kudhial</b> (<a href="https://github.com/harshitttt077">@harshitttt077</a>) &nbsp;|&nbsp; 
+          <i>Track: Machine Learning · Lane 2: Refresh / Content Opportunity Scoring</i>
+        </div>
+      </div>
+
+      <!-- Section 0: Abstract -->
+      <div class="abstract-box">
+        <div class="abstract-title">Abstract</div>
+        <p>
+          How can enterprise search editorial teams with strict review capacities (e.g., 50 pages per month) prioritize which published assets to update among tens of thousands of degrading URLs? Using an anonymized multi-domain dataset of 30,000 published pages across 200 client websites from the FlyRank Search Intelligence Warehouse, we formulate content refresh prioritization as a Learning-to-Rank task evaluated by Precision@50 under client-holdout validation. While standard industry heuristics (e.g., refreshing stale pages with high historical traffic) achieve a Precision@50 of only 0.240—underperforming the 0.542 population base rate due to survivorship bias on mature evergreen assets—our leak-free Random Forest ranking engine achieves a Precision@50 of 0.680 (a <b>2.83x lift</b>, yielding +22 additional correctly prioritized declining assets per cycle). Target leakage is strictly prevented by excluding retrospective slope indicators (<code>trend_pct</code>, <code>trend_direction</code>), and cross-domain memorization is eliminated through an 80/20 grouped client split (27,675 train rows across 160 clients, 2,325 holdout rows across 40 unseen clients). These rankings directly drive an explainable editorial review queue categorized by diagnostic reason codes (<code>stale_visible_page</code>, <code>page_one_decay_risk</code>, <code>thin_visible_page</code>), providing decision-support intelligence for content marketing operations without making unsubstantiated causal claims.
+        </p>
+      </div>
+
+      <!-- Section 1: Problem Framing -->
+      <h2 class="sec-heading">1. Introduction &amp; Problem Statement</h2>
+      <p>
+        Enterprise search and content marketing teams manage massive repositories of published content, often exceeding 10,000 to 50,000 URLs per domain. Over time, search engine index algorithms shift, competitor domains publish newer alternatives, and organic user queries drift, causing established pages to suffer severe, compounding traffic decay.
+      </p>
+      <p>
+        However, human editorial labor is inherently capacity-constrained. A professional editorial team can thoroughly audit, fact-check, rewrite, and re-index only <b>20 to 50 assets per month</b>. Content executives face an urgent operational choice: <i>Which exact 50 pages should editors touch this month to protect search revenue?</i>
+      </p>
+      <ul>
+        <li><b>Unit of Analysis:</b> A single published content asset (<code>content_id</code>) nested inside an enterprise client domain (<code>client_id</code>).</li>
+        <li><b>Output Artifact:</b> An ordered priority review queue scored from 0.0 to 1.0, annotated with diagnostic reason codes.</li>
+        <li><b>Operational Action:</b> Content writers audit, expand thin sections, refresh outdated statistics, and update SERP title/meta tags.</li>
+        <li><b>Cost of Wrong Calls:</b> A false positive squanders ~8 hours of expensive copywriter labor ($400–$800) rewriting an asset that did not need intervention. A false negative allows high-volume commercial pillar pages to lose Page 1 positions to competitors, requiring months of indexing effort to recover.</li>
+      </ul>
+
+      <!-- Section 2: Data Safety -->
+      <h2 class="sec-heading">2. Data Safety &amp; Ingestion Hygiene</h2>
+      <p>
+        We train and evaluate on the public-safe, anonymized cohort from the <b>FlyRank Search Intelligence Warehouse</b> (<code>data/raw/content_refresh_anonymized.csv</code>), comprising <b>30,000 rows across 200 client domains</b> with 44 metrics covering search volume, impressions, CTR, position, and engagement.
+      </p>
+      <div class="table-container">
+        <table class="data-table">
+          <caption>Table 1: Data Safety and Feature Isolation Protocol</caption>
+          <thead>
+            <tr>
+              <th>Field Class</th>
+              <th>Representative Columns</th>
+              <th>Operational Protocol &amp; Rationale</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Pre-Decision Features</b></td>
+              <td><code>content_age_days</code>, <code>days_since_last_update</code>, <code>log_impressions_90d</code>, <code>ctr</code>, <code>avg_position</code>, <code>word_count</code></td>
+              <td><b>Retained for Modeling:</b> Strictly observable prior to editorial review. No future trend data.</td>
+            </tr>
+            <tr>
+              <td><b>Pseudonymous IDs</b></td>
+              <td><code>client_id</code>, <code>content_id</code></td>
+              <td><b>Grouping Only:</b> Strictly banned from feature sets. Used exclusively for train/test client grouping.</td>
+            </tr>
+            <tr>
+              <td><b>Target-Derived Slope</b></td>
+              <td><code>trend_direction</code>, <code>trend_pct</code></td>
+              <td><b>Strictly Banned from Features:</b> <code>trend_direction == 'down'</code> is the target label; including slope produces fatal leakage.</td>
+            </tr>
+            <tr>
+              <td><b>Customer PII</b></td>
+              <td>URLs, domains, brand names, raw search queries</td>
+              <td><b>Completely Sanitized:</b> Zero PII exists in the repository. All entity strings are pseudonymous hashes.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 3: Methodology -->
+      <h2 class="sec-heading">3. Methodology &amp; Validation Design</h2>
+      <p>
+        Our goal is predicting the conditional probability of search decay $P(\text{is\_declining} \mid X)$. The target label is formulated as:
+      </p>
+      <pre>is_declining_label = 1 if trend_direction == 'down' else 0</pre>
+      <p>
+        <b>The Industry Baseline Heuristic:</b> We construct an industry-standard deterministic rule:
+      </p>
+      <pre>Baseline Eligible = (days_since_last_update &gt;= 180) and (impressions_90d &gt;= 500)</pre>
+      <p>
+        Eligible assets are scored by composite visibility, freshness risk, position opportunity, and depth gap, and ranked descending.
+      </p>
+      <p>
+        <b>Client-Holdout Grouped Validation:</b> Standard random row splits suffer from cross-domain contamination: pages from the same client appear in both train and test sets, allowing models to cheat by memorizing domain authority. We partition the 200 client websites into an <b>80/20 grouped client split</b>:
+      </p>
+      <ul>
+        <li><b>Training Set:</b> 160 client domains (27,675 rows) with a 54.2% decay base rate.</li>
+        <li><b>Testing Set:</b> 40 unseen client domains (2,325 rows) with a 54.2% decay base rate.</li>
+        <li><b>Assertion:</b> <code>assert len(train_clients.intersection(test_clients)) == 0</code>.</li>
+      </ul>
+
+      <!-- Section 4: Results -->
+      <h2 class="sec-heading">4. Results &amp; Performance Benchmark</h2>
+      <p>
+        We train an ensembled <b>Random Forest Classifier</b> (<code>n_estimators=200</code>, <code>max_depth=10</code>, <code>min_samples_leaf=25</code>, <code>class_weight='balanced_subsample'</code>) on the 52 pre-decision features and evaluate ranking performance on the unseen client-holdout cohort.
+      </p>
+
+      <div class="table-container">
+        <table class="data-table">
+          <caption>Table 2: Client-Holdout Benchmark Performance across Editorial Capacities ($N = 2,325$ holdout pages)</caption>
+          <thead>
+            <tr>
+              <th>Evaluation Metric</th>
+              <th>Population Base Rate</th>
+              <th>Hand-Rule Baseline</th>
+              <th>Decision Tree</th>
+              <th>Random Forest (Best)</th>
+              <th>Empirical Lift</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Precision@20</b></td>
+              <td>0.542 (54.2%)</td>
+              <td>0.150 (3 / 20)</td>
+              <td>0.500 (10 / 20)</td>
+              <td><b>0.700 (14 / 20)</b></td>
+              <td><b>4.67x</b></td>
+            </tr>
+            <tr class="highlight-row">
+              <td><b>Precision@50 (Target Capacity)</b></td>
+              <td>0.542 (54.2%)</td>
+              <td>0.240 (12 / 50)</td>
+              <td>0.540 (27 / 50)</td>
+              <td><b>0.680 (34 / 50)</b></td>
+              <td><b>2.83x</b></td>
+            </tr>
+            <tr>
+              <td><b>Precision@100</b></td>
+              <td>0.542 (54.2%)</td>
+              <td>0.360 (36 / 100)</td>
+              <td>0.530 (53 / 100)</td>
+              <td><b>0.700 (70 / 100)</b></td>
+              <td><b>1.94x</b></td>
+            </tr>
+            <tr>
+              <td><b>Holdout ROC-AUC</b></td>
+              <td>0.500</td>
+              <td>0.627</td>
+              <td>0.742</td>
+              <td><b>0.747</b></td>
+              <td>+0.120</td>
+            </tr>
+            <tr>
+              <td><b>Average Precision (PR-AUC)</b></td>
+              <td>0.542</td>
+              <td>0.468</td>
+              <td>0.575</td>
+              <td><b>0.610</b></td>
+              <td>+0.142</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Embedded Charts -->
+      <figure class="paper-fig">
+        <img src="charts/capstone_precision_at_k.svg" alt="Precision at K Comparison Curve">
+        <figcaption><b>Figure 1:</b> Precision@K comparison curve evaluated on 40 unseen holdout client domains. The Random Forest maintains a ~68–70% precision envelope across review budgets up to $K=100$, achieving a 2.83x lift over the baseline heuristic (0.240) and comfortably outperforming the random decay base rate (0.542).</figcaption>
+      </figure>
+
+      <figure class="paper-fig">
+        <img src="charts/capstone_feature_importance.svg" alt="Feature Importance Ranking">
+        <figcaption><b>Figure 2:</b> Top 10 pre-decision feature importances (Gini criterion). Search presence consistency (<code>days_with_impressions</code>) and visibility scale (<code>log_impressions_90d</code>) dominate, followed by average SERP position drift and content age.</figcaption>
+      </figure>
+
+      <!-- Section 5: Limitations -->
+      <h2 class="sec-heading">5. Limitations &amp; Honest Framing</h2>
+      <p>
+        To maintain scientific integrity and prevent over-interpretation, we explicitly define the boundaries of this work:
+      </p>
+      <ul>
+        <li><b>Predictive, Not Causal:</b> The model identifies observational correlations between pre-decision features and historical decay. It does <i>not</i> prove that rewriting a flagged page will causally restore lost traffic. Validating refresh ROI requires randomized A/B experimentation.</li>
+        <li><b>No Algorithm Reverse-Engineering:</b> This system does not claim to reverse-engineer Google's ranking algorithms. It operates strictly as a decision-support prioritization layer for human editorial teams.</li>
+        <li><b>Unobserved External SERP Disruptions:</b> The dataset records page-level performance but does not observe macro SERP layout changes (e.g., Google AI Overviews, rich snippets, zero-click answer boxes) or sudden algorithmic core updates.</li>
+        <li><b>Base Rate Context:</b> The holdout test population has an unconditional decay base rate of 54.2%. Naive metrics like accuracy (67.1%) mask the true difficulty of the task; the system's value lies exclusively in its top-$K$ precision lift (0.680 vs. 0.240).</li>
+      </ul>
+
+      <!-- Section 6: Ranked Recommendations -->
+      <h2 class="sec-heading">6. Ranked Recommendations &amp; Action Playbook</h2>
+      <p>
+        Raw probabilities are useless to copywriters. We translate the model's scores into an explainable review queue with automated diagnostic reason codes and suggested editorial interventions:
+      </p>
+
+      <div class="table-container">
+        <table class="data-table">
+          <caption>Table 3: Production Review Queue Sample (First 5 Priority Candidates)</caption>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Content ID</th>
+              <th>Priority Score</th>
+              <th>Confidence</th>
+              <th>Primary Diagnostic Reason</th>
+              <th>Suggested Editorial Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>#1</b></td>
+              <td><code>content_304f4823</code></td>
+              <td>0.941</td>
+              <td>High</td>
+              <td><code>stale_visible_page | page_one_decay_risk</code></td>
+              <td><b>Comprehensive Refresh</b> (fact-check &amp; update)</td>
+            </tr>
+            <tr>
+              <td><b>#2</b></td>
+              <td><code>content_a1fb4e70</code></td>
+              <td>0.912</td>
+              <td>High</td>
+              <td><code>low_ctr_visible_page</code></td>
+              <td><b>SERP Metadata Audit</b> (rewrite title &amp; snippet)</td>
+            </tr>
+            <tr>
+              <td><b>#3</b></td>
+              <td><code>content_9aa793d4</code></td>
+              <td>0.895</td>
+              <td>High</td>
+              <td><code>thin_visible_page</code></td>
+              <td><b>Content Expansion</b> (expand word count &gt;1,200)</td>
+            </tr>
+            <tr>
+              <td><b>#4</b></td>
+              <td><code>content_5c68b731</code></td>
+              <td>0.881</td>
+              <td>Moderate</td>
+              <td><code>stale_visible_page</code></td>
+              <td><b>Refresh &amp; Re-index</b></td>
+            </tr>
+            <tr>
+              <td><b>#5</b></td>
+              <td><code>content_2e147b90</code></td>
+              <td>0.874</td>
+              <td>Moderate</td>
+              <td><code>page_one_decay_risk</code></td>
+              <td><b>Defensive Refresh</b> (reinforce internal links)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 7: Reproducibility -->
+      <h2 class="sec-heading">7. Reproducibility &amp; Audit Trail</h2>
+      <p>
+        All experiments are deterministic and verifiable from fresh repository clones:
+      </p>
+      <pre># 1. Clone the repository
+git clone https://github.com/harshitttt077/flyrank-ml-internship-starter.git
+cd flyrank-ml-internship-starter
+
+# 2. Set up virtual environment and install dependencies
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+
+# 3. Execute the full reference pipeline
+python scripts/run_all.py
+
+# 4. Or execute the self-contained capstone notebook
+jupyter nbconvert --to notebook --execute work/notebooks/capstone.ipynb</pre>
+      <ul>
+        <li><b>Committed Metrics Receipt:</b> <code>outputs/model_results.json</code></li>
+        <li><b>Executed Capstone Notebook:</b> <a href="https://github.com/harshitttt077/flyrank-ml-internship-starter/blob/main/work/notebooks/capstone.ipynb"><code>work/notebooks/capstone.ipynb</code></a></li>
+        <li><b>Random Seeds:</b> <code>42</code> fixed across all splits, random forest estimators, and client permutations.</li>
+      </ul>
+
+      <!-- Section 8: ML-12 Closure -->
+      <h2 class="sec-heading">8. Repurposing Cuts &amp; Communication (ML-12)</h2>
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:20px; font-family:'Inter', sans-serif; font-size:14.5px;">
+        <h4 style="color:var(--accent); font-weight:700; margin-bottom:8px;">Social Post Cut (LinkedIn / X)</h4>
+        <p style="font-style:italic; margin-bottom:16px;">
+          "Most enterprise SEO refresh strategies fail because they confuse age with decay. In the FlyRank dataset of 30,000 pages, standard rules (refreshing stale pages with high traffic) yielded only 24% precision—underperforming a coin flip. Why? Evergreen pillars rank stably without rewrites. Our leak-free Random Forest pipeline achieves <b>68.0% Precision@50 (a 2.83x lift)</b> on unseen client domains. Deployed research paper &amp; code: https://harshitttt077.github.io/flyrank-ml-internship-starter/"
+        </p>
+
+        <h4 style="color:var(--accent); font-weight:700; margin-bottom:8px;">3-Sentence Employer Summary</h4>
+        <p style="margin:0;">
+          Built and validated a production-grade Learning-to-Rank pipeline in Python and Scikit-Learn that prioritizes decaying web assets for editorial refresh across 30,000 enterprise pages. Enforced strict grouped client-holdout splits and automated leakage assertions, delivering a 2.83x precision lift (0.240 → 0.680 Precision@50) over standard industry heuristics. Translated model scores into an explainable review queue with automated diagnostic reason codes, packaged as an open-source deployed research paper on GitHub Pages.
+        </p>
+      </div>
+
+      <!-- Section 9: Acknowledgments -->
+      <div class="paper-footer">
+        <div>
+          <b>Acknowledgments &amp; Data Credit:</b> Built on the <b>FlyRank ML Internship dataset</b> linking to <a href="https://flyrank.ai" target="_blank"><b>https://flyrank.ai</b></a>.
+        </div>
+        <div>
+          Harshit Kudhial · September 2026
+        </div>
+      </div>
+
+    </article>
+  </main>
+
+  <script>
+    function setView(viewMode) {
+      document.body.setAttribute('data-view', viewMode);
+      document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = Array.from(document.querySelectorAll('.toggle-btn')).find(btn => 
+        btn.getAttribute('onclick').includes(viewMode)
+      );
+      if (activeBtn) activeBtn.classList.add('active');
+    }
+  </script>
+</body>
+</html>

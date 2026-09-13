@@ -23,6 +23,7 @@ outputs/*.pdf
 !outputs/what_are_you_proving_w01.pdf
 !outputs/the_prompt_ladder_w02.pdf
 !outputs/fl_capstone_impact_project.pdf
+!outputs/google_search_ranking_capstone_ml.pdf
 outputs/model_results.json
 outputs/summary.json
 outputs/*.csv
