@@ -18,6 +18,11 @@ data/processed/
 # outputs: keep the small committed examples (model_report.md, charts/,
 # refresh_queue_sample.csv), ignore regenerated heavy artifacts
 outputs/*.pdf
+!outputs/ai_workflow_audit_fl01.pdf
+!outputs/portfolio_sitemap_toolkit_w01.pdf
+!outputs/what_are_you_proving_w01.pdf
+!outputs/the_prompt_ladder_w02.pdf
+!outputs/fl_capstone_impact_project.pdf
 outputs/model_results.json
 outputs/summary.json
 outputs/*.csv
@@ -26,6 +31,7 @@ outputs/*.csv
 # --- Intern work area ------------------------------------------------------
 # your experiments live in work/; datasets never enter git
 work/**/*.csv
+scratch/
 
 # --- Python / notebooks ----------------------------------------------------
 __pycache__/

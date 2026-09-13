@@ -1,0 +1,29 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//FlyRank AI Internship//Harshit Kudhial Living Portfolio//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Harshit Portfolio Maintenance
+X-WR-TIMEZONE:Asia/Kolkata
+BEGIN:VEVENT
+UID:20261004T043000Z-flyrank-harshit-case2@portfolio.internal
+DTSTAMP:20260913T121500Z
+DTSTART:20261004T043000Z
+DTEND:20261004T060000Z
+RRULE:FREQ=MONTHLY;BYDAY=1SU
+SUMMARY:[Portfolio Maintenance] Ship Case Study 2: Distributed Crawler
+DESCRIPTION:Habit reminder from General AI Fluency Capstone (FlyRank):\n\n1. Open Claude Project: Harshit Kudhial - Engineering Portfolio\n2. Feed raw benchmark numbers for Distributed Asynchronous Web Crawler\n3. Generate 3-Beat MDX (/content/case-studies/02-distributed-crawler.mdx)\n4. Verify Next.js render & push to GitHub\n\nPreserved build context ensures this takes <15 minutes.
+LOCATION:Local Workspace: ~/scratch/flyrank-ml-internship-starter
+STATUS:CONFIRMED
+BEGIN:VALARM
+TRIGGER:-P2D
+ACTION:DISPLAY
+DESCRIPTION:Reminder: 48 hours until Case Study 2 portfolio publish deadline. Review Claude Project draft.
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT2H
+ACTION:DISPLAY
+DESCRIPTION:Reminder: 2 hours to push Case Study 2 to live portfolio site.
+END:VALARM
+END:VEVENT
+END:VCALENDAR
