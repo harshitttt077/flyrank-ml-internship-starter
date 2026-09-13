@@ -1,0 +1,42 @@
+{
+  "base_rate": 0.5420666666666667,
+  "total_rows": 30000,
+  "precision_at_k": {
+    "P@10": {
+      "precision": 0.6,
+      "hits": 6,
+      "k": 10,
+      "lift": 1.11
+    },
+    "P@20": {
+      "precision": 0.5,
+      "hits": 10,
+      "k": 20,
+      "lift": 0.92
+    },
+    "P@50": {
+      "precision": 0.5,
+      "hits": 25,
+      "k": 50,
+      "lift": 0.92
+    },
+    "P@100": {
+      "precision": 0.41,
+      "hits": 41,
+      "k": 100,
+      "lift": 0.76
+    },
+    "P@250": {
+      "precision": 0.504,
+      "hits": 126,
+      "k": 250,
+      "lift": 0.93
+    },
+    "P@500": {
+      "precision": 0.494,
+      "hits": 247,
+      "k": 500,
+      "lift": 0.91
+    }
+  }
+}
